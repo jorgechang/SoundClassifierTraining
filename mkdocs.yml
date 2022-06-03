@@ -1,0 +1,14 @@
+site_name: Classifiertraining
+
+theme:
+   name: 'sandstone'
+
+plugins:
+   - mkdocstrings
+
+nav:
+   - Inicio: 'index.md'
+   - "Documento de diseño": 'design_doc.md'
+   - Ejemplos: 'examples.md'
+   - 'API reference':
+      - 'Model': 'api_reference/model.md'

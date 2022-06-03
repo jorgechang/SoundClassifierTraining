@@ -1,0 +1,34 @@
+name: Trigger Jenkins PR jobs
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Export branch PR to variable
+      run: |
+        echo BRANCH_JENKINS=$GITHUB_HEAD_REF >> $GITHUB_ENV
+        echo BRANCH_BASE_JENKINS=$GITHUB_BASE_REF >> $GITHUB_ENV
+        echo PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }') >> $GITHUB_ENV
+        # Strip git ref prefix from version
+        PR_NUMBER=$(echo "$\{\{ github.ref \}\}" | awk 'BEGIN { FS = "/" } ; { print $3 }')
+        # Set PR_NUMBER as environment variable
+        echo PR_NUMBER=$PR_NUMBER >> $GITHUB_ENV
+        echo $PR_NUMBER
+        echo "$PR_NUMBER"
+        echo $\{\{ env.VERSION \}\}
+
+    - name: Trigger Jenkins Main
+      id: main_pr_jenkins
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: "$\{\{ secrets.JENKINS_URL_AUTH \}\}/job/Analysis/job/soundsource-project/job/classifierTraining/job/main_pr/buildWithParameters?github_branch_pr=$\{\{ env.BRANCH_JENKINS \}\}&github_base_branch_pr=$\{\{ env.BRANCH_BASE_JENKINS \}\}&pr_number=$\{\{ env.PR_NUMBER \}\}"
+        method: POST
+
+    - name: Show Jenkins Main Response
+      run: echo $\{\{ steps.main_pr_jenkins.outputs.response \}\}
